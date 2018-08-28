@@ -263,6 +263,17 @@ class bitpay extends PaymentModule {
       }
 
     }
+    
+    private function validateOrderBeforePaymentExecution() {
+        $cart = Context::getContext()->cart;
+        $new_cart_id = $cart->id;
+        $new_status_bitpay = Configuration::get('PS_OS_PAYMENT');
+        $total = $cart->getOrderTotal(true);
+        $new_displayName = Context::getContext()->controller->module->displayName;
+        if (!empty($new_cart_id)) {
+          $this->validateOrder($new_cart_id, $new_status_bitpay, $total, $new_displayName, null, array(), null, false, $this->context->cart->secure_key);
+        }
+    }
 
     public function execPayment($cart) {
       // Create invoice
@@ -363,6 +374,7 @@ class bitpay extends PaymentModule {
         die(Tools::displayError("Error: Response did not include invoice url!"));
       } else {
         \ob_clean();  
+        $this->validateOrderBeforePaymentExecution();
         header('Location:  ' . $response['url']);
         exit;
       }

@@ -73,7 +73,7 @@ if($invoice_bitpay !== false)
             if ($order == 0)
             {
                 $key = $posData->key;
-                $bitpay->validateOrder($posData->cart_id, $status_bitpay, $invoice_bitpay['price'], $bitpay->displayName, null, array(), null, false, $key);
+                //$bitpay->validateOrder($posData->cart_id, $status_bitpay, $invoice_bitpay['price'], $bitpay->displayName, null, array(), null, false, $key);
                 $bitpay->writeDetails($bitpay->currentOrder, $posData->cart_id, $invoice_bitpay['id'], $invoice_bitpay['status']);
             }
             else 

@@ -263,6 +263,17 @@ class bitpay extends PaymentModule {
       }
 
     }
+    
+    private function validateOrderBeforePaymentExecution() {
+        $cart = Context::getContext()->cart;
+        $new_cart_id = $cart->id;
+        $new_status_bitpay = Configuration::get('PS_OS_PREPARATION');
+        $total = $cart->getOrderTotal(true);
+        $new_displayName = Context::getContext()->controller->module->displayName;
+        if (!empty($new_cart_id)) {
+          $this->validateOrder($new_cart_id, $new_status_bitpay, $total, $new_displayName, null, array(), null, false, $this->context->cart->secure_key);
+        }
+    }
 
     public function execPayment($cart) {
       // Create invoice
@@ -283,12 +294,18 @@ class bitpay extends PaymentModule {
 
       $this->key                   = $this->context->customer->secure_key;
       
+      $cartid = $cart->id;
+      $this->validateOrderBeforePaymentExecution();
+      $orderId = (int)Order::getOrderByCartId($cartid);
+      $order = new Order($orderId);
+      
+      $options['orderId']          = $order->id;
       $options['posData']         .= ', "key": "' . $this->key . '"}';
-      $options['orderID']          = $cart->id;
+      
       $options['price']            = $total;
       $options['fullNotifications'] = true;
 
-      $postOptions                 = array('orderID', 'itemDesc', 'itemCode', 
+      $postOptions                 = array('orderId', 'itemDesc', 'itemCode', 
                                            'notificationEmail', 'notificationURL', 'redirectURL', 
                                            'posData', 'price', 'currency', 'physical', 'fullNotifications',
                                            'transactionSpeed', 'buyerName', 'buyerAddress1', 
